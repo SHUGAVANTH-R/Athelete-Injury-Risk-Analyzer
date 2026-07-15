@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Raw dataset (not needed for deployment; keep it out of git)
+Athlete.xlsx
+
+# Train/test split caches (regenerate locally with preprocess.py; not needed by app.py)
+models/X_train.npy
+models/X_test.npy
+models/y_train.pkl
+models/y_test.pkl
+
+# Evaluation plots (regenerate with evaluate.py)
+results/
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# OS/IDE
+.DS_Store
+.vscode/
+.idea/
