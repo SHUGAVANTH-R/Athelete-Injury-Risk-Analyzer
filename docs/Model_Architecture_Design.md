@@ -117,7 +117,7 @@
 | Module | Concept Used | Where Applied |
 |---|---|---|
 | **Module 1** (MLP / RNN / LSTM / Hopfield / Boltzmann) | **Multi-Layer Perceptron (MLP)** | `model.py` — 4 hidden layers with ReLU, BatchNorm, Dropout |
-| **Module 2** (CNN / Autoencoder / GAN / Attention / Transfer Learning / DRL) | **Autoencoder-inspired progressive compression** | The funnel architecture (128→64→32→16) mirrors an autoencoder's encoder, progressively compressing input features into a compact risk representation |
+| **Module 2** (CNN / Autoencoder / GAN / Attention / Transfer Learning / DRL) | **Feature-reconstruction Autoencoder** | `autoencoder.py` implements a symmetric 15→64→32→16→32→64→15 autoencoder; `train_autoencoder.py` trains and saves the encoder and reconstruction model |
 | **Module 3** (Real-World Application) | **Explainable AI (SHAP + LIME) + Streamlit Deployment** | `explainability.py` + `app.py` — real-time predictions with feature-attribution explanations |
 
 ---

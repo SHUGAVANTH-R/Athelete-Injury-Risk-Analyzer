@@ -29,7 +29,7 @@ Input(15) → Dense(128,ReLU)+BN+Dropout(0.3)
 ```
 
 - **Module 1:** MLP (Multi-Layer Perceptron)
-- **Module 2:** Autoencoder-inspired progressive compression (128→64→32→16)
+- **Module 2:** Trained feature-reconstruction autoencoder (15→64→32→16→32→64→15)
 - **Module 3:** Explainable AI (SHAP + LIME) + Streamlit Deployment
 
 See [docs/Model_Architecture_Design.md](docs/Model_Architecture_Design.md) for the full layer-by-layer explanation and architecture diagram.
@@ -73,7 +73,9 @@ All results are saved to `results/`. See [docs/FINAL_REPORT.md](docs/FINAL_REPOR
 │
 ├── preprocess.py                   # Data preprocessing pipeline
 ├── model.py                        # DNN architecture definition
+├── autoencoder.py                  # Module 2 feature-reconstruction autoencoder
 ├── train.py                        # Training script with callbacks
+├── train_autoencoder.py            # Module 2 autoencoder training script
 ├── evaluate.py                     # Model evaluation & plots
 ├── explainability.py               # SHAP + LIME explainers
 ├── predict_recommendation.py       # CLI prediction + recommendations
@@ -136,6 +138,7 @@ pip install -r requirements.txt
 ```bash
 python preprocess.py Athlete.xlsx   # Preprocess: generates models/*.pkl
 python train.py                     # Train: saves models/best_model.keras
+python train_autoencoder.py         # Train Module 2 autoencoder and save its artifacts
 python evaluate.py                  # Evaluate: generates results/ plots
 ```
 

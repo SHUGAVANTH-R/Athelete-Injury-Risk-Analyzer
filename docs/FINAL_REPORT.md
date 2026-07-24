@@ -91,7 +91,7 @@ Input(15) → Dense(128,ReLU) → BN → Dropout(0.3)
 ```
 
 **Architecture Rationale:**
-- **Funnel shape (128→64→32→16):** Progressive compression mirrors an autoencoder's encoder (**Module 2** concept), forcing the network to learn increasingly abstract risk representations.
+- **Module 2 autoencoder:** `autoencoder.py` implements and trains a symmetric feature-reconstruction autoencoder (15→64→32→16→32→64→15). Its 16-unit bottleneck learns a compact representation of standardized athlete features; the resulting encoder and reconstruction model are saved in `models/`.
 - **BatchNormalization:** Stabilizes training on the small 1,000-sample dataset by reducing internal covariate shift.
 - **Dropout (0.30):** Prevents overfitting in the parameter-heavy early layers.
 - **Sigmoid output:** Produces a calibrated probability for threshold-based risk categorization.
@@ -210,7 +210,7 @@ This project demonstrates that a deep neural network with explainable AI can eff
 | Module | Concept | Implementation |
 |---|---|---|
 | **Module 1** | Multi-Layer Perceptron (MLP) | `model.py` — 4 hidden layers with ReLU, BatchNorm, Dropout |
-| **Module 2** | Autoencoder-inspired progressive compression | Funnel architecture (128→64→32→16) mirrors encoder design |
+| **Module 2** | Feature-reconstruction Autoencoder | `autoencoder.py` and `train_autoencoder.py` train a 15→64→32→16→32→64→15 reconstruction model; `results/autoencoder_loss_curve.png` records its training |
 | **Module 3** | Real-World Application: XAI + Deployment | `explainability.py` (SHAP/LIME) + `app.py` (Streamlit) |
 
 ---

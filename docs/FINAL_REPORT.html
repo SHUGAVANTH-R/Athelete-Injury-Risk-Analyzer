@@ -60,7 +60,7 @@
       <h3>A. Dataset and Preprocessing</h3>
       <p>The supplied <i>Athlete.xlsx</i> dataset contains 1,000 records, 15 input features, and a binary Injury_Risk target. It includes age, anthropometrics, training frequency and intensity, sleep, flexibility, muscle asymmetry, recovery, injury history, and stress. Categorical fields are label encoded; numeric features are standardized. A stratified 80/20 split preserves the 80.9% low-risk and 19.1% high-risk class distribution.</p>
       <h3>B. Architecture and Module Mapping</h3>
-      <p><b>Module 1:</b> a 4-hidden-layer MLP. <b>Module 2:</b> progressively compressive 128→64→32→16 feature representation, motivated by an autoencoder encoder. <b>Module 3:</b> SHAP/LIME explanations, personalized recommendations, and Streamlit deployment.</p>
+      <p><b>Module 1:</b> a 4-hidden-layer MLP. <b>Module 2:</b> a trained feature-reconstruction autoencoder (15→64→32→16→32→64→15) with a 16-unit latent representation. <b>Module 3:</b> SHAP/LIME explanations, personalized recommendations, and Streamlit deployment.</p>
       <figure><img src="architecture.png" alt="Architecture diagram"><figcaption>Fig. 1. MLP architecture: 15 standardized inputs, Dense(128)/BatchNorm/Dropout, Dense(64)/BatchNorm/Dropout, Dense(32), Dense(16), and sigmoid output.</figcaption></figure>
       <h3>C. Training</h3>
       <p>The model uses Adam (learning rate 0.001), binary cross-entropy, early stopping, learning-rate reduction, and checkpointing. The selected checkpoint is stored as <i>models/best_model.keras</i>.</p>
