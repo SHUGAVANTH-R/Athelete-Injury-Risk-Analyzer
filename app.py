@@ -55,10 +55,6 @@ with col2:
     flexibility = st.slider("Flexibility Score", 1, 10, 6)
     muscle = st.slider("Muscle Asymmetry", 1, 10, 4)
     recovery = st.slider("Recovery Time", 1, 72, 24)
-    # NOTE: the training data (Athlete.xlsx) has Injury_History as 4
-    # distinct levels (0-3), not a strict Yes/No. This selectbox is a
-    # simplification — see the README note on this field. If you have
-    # the true count of previous injuries, prefer a number_input(0,3).
     injury = st.selectbox("Previous Injury", ["No", "Yes"])
     stress = st.slider("Stress Level", 1, 10, 4)
     intensity = st.slider("Training Intensity", 1, 10, 5)

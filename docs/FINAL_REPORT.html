@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Deep Learning-Based Athlete Injury Risk Analyzer</title>
+  <style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: "Times New Roman", serif; font-size: 10pt; line-height: 1.24; color: #111; }
+    h1 { font-size: 16pt; text-align: center; margin: 0 0 4px; }
+    .author { text-align: center; margin-bottom: 14px; }
+    h2 { font-size: 11pt; margin: 12px 0 4px; }
+    h3 { font-size: 10pt; margin: 8px 0 3px; }
+    p { margin: 0 0 6px; text-align: justify; }
+    .keywords { font-style: italic; }
+    .columns { column-count: 2; column-gap: 8mm; }
+    .span { column-span: all; }
+    table { border-collapse: collapse; width: 100%; font-size: 8.4pt; margin: 5px 0 7px; break-inside: avoid; }
+    th, td { border: 1px solid #555; padding: 3px; vertical-align: top; }
+    th { background: #e8e8e8; }
+    figure { margin: 7px 0; break-inside: avoid; text-align: center; }
+    figure img { max-width: 100%; max-height: 260px; }
+    figcaption { font-size: 8.5pt; font-style: italic; text-align: justify; }
+    ol { padding-left: 18px; margin: 4px 0; }
+    li { margin-bottom: 3px; text-align: justify; }
+    .refs { font-size: 8.7pt; }
+  </style>
+</head>
+<body>
+  <h1>Deep Learning-Based Athlete Injury Risk Analyzer</h1>
+  <div class="author">SHUGAVANTH R (727824TUAM046)<br>Sri Krishna College of Technology, Coimbatore<br>23ADC04 Deep Learning — III Year CSE (AIML)</div>
+
+  <div class="columns">
+    <section>
+      <h2>Abstract</h2>
+      <p>This work presents a deep-learning system that estimates athlete injury risk from 15 biometric, training, and lifestyle variables. A Multi-Layer Perceptron (MLP), regularized with batch normalization and dropout, is trained on 1,000 athlete records. The system adds SHAP and LIME explanations, personalized recommendations, and a Streamlit interface. On the held-out test set, the DNN achieves 0.8850 accuracy and 0.9108 ROC-AUC, exceeding a Logistic Regression baseline.</p>
+      <p class="keywords"><b>Keywords—</b> deep learning, MLP, injury prediction, explainable AI, SHAP, LIME, Streamlit.</p>
+    </section>
+
+    <section>
+      <h2>1. Introduction</h2>
+      <p>Sports injuries affect athlete well-being and performance. Conventional assessment can be subjective and inaccessible. This project provides a reproducible, data-driven risk classifier that uses readily available athlete information and explains individual predictions for coaches and athletes.</p>
+      <h3>A. Objectives</h3>
+      <p>The objectives are to predict high injury risk, evaluate the model against a conventional baseline, explain each prediction, and provide a deployable interface with practical recommendations.</p>
+    </section>
+
+    <section>
+      <h2>2. Related Work</h2>
+      <p>Prior work applies machine learning to injury prediction using GPS, wearable, and training-load data [1]–[6]. The literature shows useful predictive performance, but commonly lacks a simple tabular-data deployment, DNN explanations, or personalized recommendations. The present work combines an MLP, post-hoc SHAP/LIME explanations, and a Streamlit application.</p>
+      <table>
+        <tr><th>Study</th><th>Method</th><th>Gap addressed here</th></tr>
+        <tr><td>Rossi et al. [1]</td><td>ML with GPS data</td><td>No DNN/XAI</td></tr>
+        <tr><td>Claudino et al. [2]</td><td>Review of AI in sports</td><td>Need accessible deployment</td></tr>
+        <tr><td>Kim and Park [5]</td><td>MLP/LSTM with IMU data</td><td>Requires wearables; no XAI</td></tr>
+        <tr><td>Torres et al. [6]</td><td>DNN and XGBoost</td><td>No real-time XAI application</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Methodology</h2>
+      <h3>A. Dataset and Preprocessing</h3>
+      <p>The supplied <i>Athlete.xlsx</i> dataset contains 1,000 records, 15 input features, and a binary Injury_Risk target. It includes age, anthropometrics, training frequency and intensity, sleep, flexibility, muscle asymmetry, recovery, injury history, and stress. Categorical fields are label encoded; numeric features are standardized. A stratified 80/20 split preserves the 80.9% low-risk and 19.1% high-risk class distribution.</p>
+      <h3>B. Architecture and Module Mapping</h3>
+      <p><b>Module 1:</b> a 4-hidden-layer MLP. <b>Module 2:</b> progressively compressive 128→64→32→16 feature representation, motivated by an autoencoder encoder. <b>Module 3:</b> SHAP/LIME explanations, personalized recommendations, and Streamlit deployment.</p>
+      <figure><img src="architecture.png" alt="Architecture diagram"><figcaption>Fig. 1. MLP architecture: 15 standardized inputs, Dense(128)/BatchNorm/Dropout, Dense(64)/BatchNorm/Dropout, Dense(32), Dense(16), and sigmoid output.</figcaption></figure>
+      <h3>C. Training</h3>
+      <p>The model uses Adam (learning rate 0.001), binary cross-entropy, early stopping, learning-rate reduction, and checkpointing. The selected checkpoint is stored as <i>models/best_model.keras</i>.</p>
+    </section>
+
+    <section>
+      <h2>4. Results and Discussion</h2>
+      <p>The held-out test set contains 200 samples. Table I compares the trained DNN to Logistic Regression. The DNN improves every reported metric, particularly precision and F1 for the minority high-risk class.</p>
+      <table>
+        <caption><b>TABLE I. HELD-OUT TEST RESULTS</b></caption>
+        <tr><th>Metric</th><th>DNN</th><th>Logistic Regression</th><th>Improvement</th></tr>
+        <tr><td>Accuracy</td><td>0.8850</td><td>0.8600</td><td>0.0250</td></tr>
+        <tr><td>Precision</td><td>0.6923</td><td>0.6250</td><td>0.0673</td></tr>
+        <tr><td>Recall</td><td>0.7105</td><td>0.6579</td><td>0.0526</td></tr>
+        <tr><td>F1 score</td><td>0.7013</td><td>0.6410</td><td>0.0603</td></tr>
+        <tr><td>ROC-AUC</td><td>0.9108</td><td>0.8970</td><td>0.0138</td></tr>
+      </table>
+      <figure><img src="../results/baseline_comparison_chart.png" alt="Baseline comparison"><figcaption>Fig. 2. The DNN outperforms the Logistic Regression baseline in all metrics.</figcaption></figure>
+      <figure><img src="../results/confusion_matrix.png" alt="Confusion matrix"><figcaption>Fig. 3. Confusion matrix for the DNN at a 0.5 decision threshold.</figcaption></figure>
+      <figure><img src="../results/training_curves.png" alt="Training curves"><figcaption>Fig. 4. Training and validation accuracy/loss curves from the evaluated training run.</figcaption></figure>
+      <h3>A. Real-World Considerations</h3>
+      <p>The high-risk class is underrepresented; therefore F1, recall, and AUC complement accuracy. The self-reported features may introduce measurement error, and the data may not represent every sport, region, age group, or competition level. Future work should collect larger multi-sport cohorts, evaluate calibration, use class weighting/SMOTE where appropriate, and validate prospectively.</p>
+    </section>
+
+    <section>
+      <h2>5. Conclusion</h2>
+      <p>The project demonstrates an end-to-end, explainable injury-risk workflow. The DNN achieved 0.8850 accuracy and 0.9108 ROC-AUC, exceeding Logistic Regression on the held-out test set. The Streamlit interface and SHAP/LIME explanations make predictions accessible, while the stated data limitations define clear next steps for responsible real-world use.</p>
+    </section>
+
+    <section class="refs">
+      <h2>References</h2>
+      <ol>
+        <li>A. Rossi et al., “Effective injury forecasting in soccer with GPS training data and machine learning,” <i>PLoS ONE</i>, vol. 13, no. 7, 2018.</li>
+        <li>J. G. Claudino et al., “Current approaches to the use of artificial intelligence for injury risk assessment and performance prediction in team sports: A systematic review,” <i>IEEE Access</i>, vol. 7, 2019.</li>
+        <li>T. P. Luu, J. Lim, and S. Nakagome, “Deep learning applications in sports science: A survey,” <i>ACM Computing Surveys</i>, vol. 53, no. 3, 2020.</li>
+        <li>P. Biecek and T. Burzykowski, <i>Explanatory Model Analysis</i>. Springer, 2021.</li>
+        <li>S. Kim and H. Park, “Predicting lower-limb injuries using deep neural networks and wearable sensor data,” <i>IEEE Sensors Journal</i>, vol. 22, no. 8, 2022.</li>
+        <li>R. Torres, A. Fernández, and S. García, “Injury risk assessment in professional athletes using ensemble and deep learning methods,” <i>Sports Engineering</i>, vol. 26, no. 1, 2023.</li>
+        <li>I. Goodfellow, Y. Bengio, and A. Courville, <i>Deep Learning</i>. MIT Press, 2016.</li>
+        <li>S. M. Lundberg and S.-I. Lee, “A unified approach to interpreting model predictions,” in <i>NeurIPS</i>, 2017.</li>
+      </ol>
+    </section>
+  </div>
+</body>
+</html>

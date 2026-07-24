@@ -6,8 +6,12 @@ __pycache__/
 venv/
 env/
 
-# Raw dataset (not needed for deployment; keep it out of git)
-Athlete.xlsx
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset
+# Athlete.xlsx is intentionally versioned: it is small and makes the
+# preprocessing, training, and evaluation workflow reproducible.
 
 # Train/test split caches (regenerate locally with preprocess.py; not needed by app.py)
 models/X_train.npy
@@ -15,8 +19,11 @@ models/X_test.npy
 models/y_train.pkl
 models/y_test.pkl
 
-# Evaluation plots (regenerate with evaluate.py)
-results/
+# Large, reproducible experiment checkpoints.  Keep the evaluated final
+# checkpoint below so the submitted application can run out of the box.
+models/*.h5
+models/*.keras
+!models/best_model.keras
 
 # Streamlit secrets
 .streamlit/secrets.toml
@@ -25,3 +32,4 @@ results/
 .DS_Store
 .vscode/
 .idea/
+Thumbs.db
