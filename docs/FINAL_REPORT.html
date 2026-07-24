@@ -1,108 +1,202 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Deep Learning-Based Athlete Injury Risk Analyzer</title>
-  <style>
-    @page { size: A4; margin: 15mm; }
-    body { font-family: "Times New Roman", serif; font-size: 10pt; line-height: 1.24; color: #111; }
-    h1 { font-size: 16pt; text-align: center; margin: 0 0 4px; }
-    .author { text-align: center; margin-bottom: 14px; }
-    h2 { font-size: 11pt; margin: 12px 0 4px; }
-    h3 { font-size: 10pt; margin: 8px 0 3px; }
-    p { margin: 0 0 6px; text-align: justify; }
-    .keywords { font-style: italic; }
-    .columns { column-count: 2; column-gap: 8mm; }
-    .span { column-span: all; }
-    table { border-collapse: collapse; width: 100%; font-size: 8.4pt; margin: 5px 0 7px; break-inside: avoid; }
-    th, td { border: 1px solid #555; padding: 3px; vertical-align: top; }
-    th { background: #e8e8e8; }
-    figure { margin: 7px 0; break-inside: avoid; text-align: center; }
-    figure img { max-width: 100%; max-height: 260px; }
-    figcaption { font-size: 8.5pt; font-style: italic; text-align: justify; }
-    ol { padding-left: 18px; margin: 4px 0; }
-    li { margin-bottom: 3px; text-align: justify; }
-    .refs { font-size: 8.7pt; }
-  </style>
-</head>
-<body>
-  <h1>Deep Learning-Based Athlete Injury Risk Analyzer</h1>
-  <div class="author">SHUGAVANTH R (727824TUAM046)<br>Sri Krishna College of Technology, Coimbatore<br>23ADC04 Deep Learning — III Year CSE (AIML)</div>
-
-  <div class="columns">
-    <section>
-      <h2>Abstract</h2>
-      <p>This work presents a deep-learning system that estimates athlete injury risk from 15 biometric, training, and lifestyle variables. A Multi-Layer Perceptron (MLP), regularized with batch normalization and dropout, is trained on 1,000 athlete records. The system adds SHAP and LIME explanations, personalized recommendations, and a Streamlit interface. On the held-out test set, the DNN achieves 0.8850 accuracy and 0.9108 ROC-AUC, exceeding a Logistic Regression baseline.</p>
-      <p class="keywords"><b>Keywords—</b> deep learning, MLP, injury prediction, explainable AI, SHAP, LIME, Streamlit.</p>
-    </section>
-
-    <section>
-      <h2>1. Introduction</h2>
-      <p>Sports injuries affect athlete well-being and performance. Conventional assessment can be subjective and inaccessible. This project provides a reproducible, data-driven risk classifier that uses readily available athlete information and explains individual predictions for coaches and athletes.</p>
-      <h3>A. Objectives</h3>
-      <p>The objectives are to predict high injury risk, evaluate the model against a conventional baseline, explain each prediction, and provide a deployable interface with practical recommendations.</p>
-    </section>
-
-    <section>
-      <h2>2. Related Work</h2>
-      <p>Prior work applies machine learning to injury prediction using GPS, wearable, and training-load data [1]–[6]. The literature shows useful predictive performance, but commonly lacks a simple tabular-data deployment, DNN explanations, or personalized recommendations. The present work combines an MLP, post-hoc SHAP/LIME explanations, and a Streamlit application.</p>
-      <table>
-        <tr><th>Study</th><th>Method</th><th>Gap addressed here</th></tr>
-        <tr><td>Rossi et al. [1]</td><td>ML with GPS data</td><td>No DNN/XAI</td></tr>
-        <tr><td>Claudino et al. [2]</td><td>Review of AI in sports</td><td>Need accessible deployment</td></tr>
-        <tr><td>Kim and Park [5]</td><td>MLP/LSTM with IMU data</td><td>Requires wearables; no XAI</td></tr>
-        <tr><td>Torres et al. [6]</td><td>DNN and XGBoost</td><td>No real-time XAI application</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2>3. Methodology</h2>
-      <h3>A. Dataset and Preprocessing</h3>
-      <p>The supplied <i>Athlete.xlsx</i> dataset contains 1,000 records, 15 input features, and a binary Injury_Risk target. It includes age, anthropometrics, training frequency and intensity, sleep, flexibility, muscle asymmetry, recovery, injury history, and stress. Categorical fields are label encoded; numeric features are standardized. A stratified 80/20 split preserves the 80.9% low-risk and 19.1% high-risk class distribution.</p>
-      <h3>B. Architecture and Module Mapping</h3>
-      <p><b>Module 1:</b> a 4-hidden-layer MLP. <b>Module 2:</b> a trained feature-reconstruction autoencoder (15→64→32→16→32→64→15) with a 16-unit latent representation. <b>Module 3:</b> SHAP/LIME explanations, personalized recommendations, and Streamlit deployment.</p>
-      <figure><img src="architecture.png" alt="Architecture diagram"><figcaption>Fig. 1. MLP architecture: 15 standardized inputs, Dense(128)/BatchNorm/Dropout, Dense(64)/BatchNorm/Dropout, Dense(32), Dense(16), and sigmoid output.</figcaption></figure>
-      <h3>C. Training</h3>
-      <p>The model uses Adam (learning rate 0.001), binary cross-entropy, early stopping, learning-rate reduction, and checkpointing. The selected checkpoint is stored as <i>models/best_model.keras</i>.</p>
-    </section>
-
-    <section>
-      <h2>4. Results and Discussion</h2>
-      <p>The held-out test set contains 200 samples. Table I compares the trained DNN to Logistic Regression. The DNN improves every reported metric, particularly precision and F1 for the minority high-risk class.</p>
-      <table>
-        <caption><b>TABLE I. HELD-OUT TEST RESULTS</b></caption>
-        <tr><th>Metric</th><th>DNN</th><th>Logistic Regression</th><th>Improvement</th></tr>
-        <tr><td>Accuracy</td><td>0.8850</td><td>0.8600</td><td>0.0250</td></tr>
-        <tr><td>Precision</td><td>0.6923</td><td>0.6250</td><td>0.0673</td></tr>
-        <tr><td>Recall</td><td>0.7105</td><td>0.6579</td><td>0.0526</td></tr>
-        <tr><td>F1 score</td><td>0.7013</td><td>0.6410</td><td>0.0603</td></tr>
-        <tr><td>ROC-AUC</td><td>0.9108</td><td>0.8970</td><td>0.0138</td></tr>
-      </table>
-      <figure><img src="../results/baseline_comparison_chart.png" alt="Baseline comparison"><figcaption>Fig. 2. The DNN outperforms the Logistic Regression baseline in all metrics.</figcaption></figure>
-      <figure><img src="../results/confusion_matrix.png" alt="Confusion matrix"><figcaption>Fig. 3. Confusion matrix for the DNN at a 0.5 decision threshold.</figcaption></figure>
-      <figure><img src="../results/training_curves.png" alt="Training curves"><figcaption>Fig. 4. Training and validation accuracy/loss curves from the evaluated training run.</figcaption></figure>
-      <h3>A. Real-World Considerations</h3>
-      <p>The high-risk class is underrepresented; therefore F1, recall, and AUC complement accuracy. The self-reported features may introduce measurement error, and the data may not represent every sport, region, age group, or competition level. Future work should collect larger multi-sport cohorts, evaluate calibration, use class weighting/SMOTE where appropriate, and validate prospectively.</p>
-    </section>
-
-    <section>
-      <h2>5. Conclusion</h2>
-      <p>The project demonstrates an end-to-end, explainable injury-risk workflow. The DNN achieved 0.8850 accuracy and 0.9108 ROC-AUC, exceeding Logistic Regression on the held-out test set. The Streamlit interface and SHAP/LIME explanations make predictions accessible, while the stated data limitations define clear next steps for responsible real-world use.</p>
-    </section>
-
-    <section class="refs">
-      <h2>References</h2>
-      <ol>
-        <li>A. Rossi et al., “Effective injury forecasting in soccer with GPS training data and machine learning,” <i>PLoS ONE</i>, vol. 13, no. 7, 2018.</li>
-        <li>J. G. Claudino et al., “Current approaches to the use of artificial intelligence for injury risk assessment and performance prediction in team sports: A systematic review,” <i>IEEE Access</i>, vol. 7, 2019.</li>
-        <li>T. P. Luu, J. Lim, and S. Nakagome, “Deep learning applications in sports science: A survey,” <i>ACM Computing Surveys</i>, vol. 53, no. 3, 2020.</li>
-        <li>P. Biecek and T. Burzykowski, <i>Explanatory Model Analysis</i>. Springer, 2021.</li>
-        <li>S. Kim and H. Park, “Predicting lower-limb injuries using deep neural networks and wearable sensor data,” <i>IEEE Sensors Journal</i>, vol. 22, no. 8, 2022.</li>
-        <li>R. Torres, A. Fernández, and S. García, “Injury risk assessment in professional athletes using ensemble and deep learning methods,” <i>Sports Engineering</i>, vol. 26, no. 1, 2023.</li>
-        <li>I. Goodfellow, Y. Bengio, and A. Courville, <i>Deep Learning</i>. MIT Press, 2016.</li>
-        <li>S. M. Lundberg and S.-I. Lee, “A unified approach to interpreting model predictions,” in <i>NeurIPS</i>, 2017.</li>
-      </ol>
-    </section>
-  </div>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Deep Learning-Based Athlete Injury Risk Analyzer</title><style>@page { size: A4; margin: 16mm; }
+body { color:#111; font-family:Arial,sans-serif; font-size:10.2pt; line-height:1.42; max-width:180mm; margin:auto; }
+h1 { color:#12263a; font-size:19pt; line-height:1.18; margin:16px 0 8px; } h1:first-of-type { text-align:center; font-size:23pt; }
+h2 { color:#0d4c73; border-bottom:1px solid #b7cad5; font-size:14pt; margin:22px 0 8px; padding-bottom:3px; }
+h3 { color:#173f5f; font-size:11.5pt; margin:15px 0 5px; } p { margin:0 0 8px; text-align:justify; }
+table { border-collapse:collapse; font-size:8.7pt; margin:10px 0 14px; width:100%; break-inside:avoid; } th,td { border:1px solid #9db0be; padding:5px; text-align:left; vertical-align:top; } th { background:#e8f1f6; }
+ol { margin:3px 0 10px; padding-left:22px; } li { margin-bottom:5px; text-align:justify; } figure { break-inside:avoid; margin:14px auto; text-align:center; } figure img { max-height:220mm; max-width:100%; }
+code { background:#edf2f5; border-radius:2px; font-family:Consolas,monospace; font-size:8.8pt; padding:1px 3px; } .equation { background:#f6f8fa; font-family:Consolas,monospace; margin:9px 0; overflow-wrap:anywhere; padding:8px; text-align:center; } .bullet { margin-left:14px; } a { color:#075985; } hr { border:0; border-top:1px solid #aab7c1; margin:18px 0; }</style></head><body><h1>Final Report</h1>
+<h1>Deep Learning-Based Athlete Injury Risk Analyzer</h1>
+<p><strong>Student:</strong> SHUGAVANTH R (727824TUAM046)</p>
+<p><strong>Course:</strong> 23ADC04 — Deep Learning | III Year CSE (AIML)</p>
+<p><strong>Institution:</strong> Sri Krishna College of Technology, Coimbatore, Tamil Nadu</p>
+<hr>
+<h2>Abstract</h2>
+<p>This project develops a decision-support prototype that estimates the probability of elevated injury risk from 15 athlete demographic, anthropometric, training, recovery, and self-reported variables. The primary predictive model is a fully connected deep neural network (multi-layer perceptron, MLP) with 128–64–32–16 hidden units, rectified linear unit (ReLU) activations, batch normalization, and dropout regularization. A separate symmetric autoencoder is also trained to learn a 16-dimensional unsupervised representation of the same standardized feature set. The supervised MLP was trained on 800 records and evaluated once on a stratified, held-out test set of 200 records. At a fixed probability threshold of 0.50, it obtained accuracy 0.8850, precision 0.6923, recall 0.7105, F1-score 0.7013, and ROC-AUC 0.9108; it exceeded the recorded logistic-regression baseline on every reported metric. The application exposes a probability, a three-band risk label, individualized recommendations, and local SHAP and LIME explanations. These results are promising for a coursework prototype, but they are not clinical validation: the data source, label construction, external generalizability, calibration, and decision thresholds require prospective validation before use in medical or return-to-play decisions.</p>
+<p><strong>Keywords:</strong> athlete injury risk; deep learning; multi-layer perceptron; autoencoder; explainable AI; SHAP; LIME; tabular data</p>
+<h2>1. Introduction</h2>
+<p>Sports injuries can reduce participation, performance, and long-term health. Injury occurrence is multifactorial: prior injury, training exposure, recovery, anthropometry, sleep, stress, and sport-specific load may interact in non-linear ways [1–6]. This makes a single universal screening rule unrealistic. Machine learning can summarize patterns in routinely collected variables, but a useful system must report uncertainty, avoid causal claims, and remain understandable to coaches and athletes [7–10].</p>
+<p>The objective of this project is to build an accessible, reproducible proof of concept for binary injury-risk classification from tabular athlete data. The project has four deliverables: (1) reproducible preprocessing and a train/test split, (2) a regularized MLP classifier, (3) an unsupervised autoencoder module for representation learning, and (4) a Streamlit interface with local explanations and recommendations. The output is a risk estimate, not a diagnosis, a causal explanation, or a replacement for a qualified clinician.</p>
+<h2>2. Dataset and Problem Definition</h2>
+<h3>2.1 Dataset profile</h3>
+<p>The local <code>Athlete.xlsx</code> dataset contains 1,000 rows and 16 columns: 15 predictors and the binary target <code>Injury_Risk</code>. The class counts are 809 low-risk records (0) and 191 high-risk records (1). No missing values were recorded in the report dataset.</p>
+<table>
+<thead><tr><th>Feature group</th><th>Variables used</th></tr></thead>
+<tbody>
+<tr><td>Demographic / anthropometric</td><td>Age, Gender, Height_cm, Weight_kg, BMI</td></tr>
+<tr><td>Training exposure</td><td>Training_Frequency, Training_Duration, Warmup_Time, Training_Intensity</td></tr>
+<tr><td>Recovery / condition</td><td>Sleep_Hours, Flexibility_Score, Muscle_Asymmetry, Recovery_Time, Stress_Level</td></tr>
+<tr><td>History</td><td>Injury_History</td></tr>
+<tr><td>Target</td><td>Injury_Risk (0 = low risk, 1 = high risk)</td></tr>
+</tbody>
+</table>
+<p>The dataset has moderate class imbalance (19.1% high risk). Therefore accuracy is reported alongside precision, recall, F1-score, ROC-AUC, and a confusion matrix. Because the dataset documentation does not establish whether labels are prospective injuries, expert annotations, or a constructed rule, the model should be interpreted as learning the dataset label—not as proving future injury causation.</p>
+<h3>2.2 Experimental split</h3>
+<p>The preprocessor performs an 80/20 stratified split with <code>random_state=42</code>, yielding 800 development records and 200 held-out test records. The test set contains 162 low-risk and 38 high-risk records. A further 20% of the 800 development records is used by Keras as the validation split during training (approximately 640 fitting and 160 validation records). Scaling parameters are fit on training data and persisted with the other preprocessing artifacts for inference consistency.</p>
+<h2>3. Data Preparation</h2>
+<ol>
+<li><strong>Cleaning and typing:</strong> the Excel file is loaded with pandas/openpyxl; duplicates can be removed and numeric/categorical missing values are handled by mean/mode imputation in the preprocessing module.</li>
+<li><strong>Categorical encoding:</strong> <code>Gender</code> and <code>Injury_History</code> are transformed with label encoders.</li>
+<li><strong>Stratified partitioning:</strong> <code>train_test_split(..., stratify=y, random_state=42)</code> preserves the minority-class proportion in the test set.</li>
+<li><strong>Standardization:</strong> <code>StandardScaler</code> transforms every input to approximately zero mean and unit variance using training-set statistics. This is particularly important for gradient-based neural-network optimization because inputs such as height, sleep, and flexibility have different scales [11].</li>
+<li><strong>Deployment artifacts:</strong> the scaler, encoders, feature names, test/train arrays, and a background sample for explanation are saved in <code>models/</code>. The deployed app applies the same transformations before prediction.</li>
+</ol>
+<p>No resampling, SMOTE, class weighting, feature selection, or threshold optimization was used in the recorded run. This avoids changing the apparent class prevalence, but may leave recall for the minority class below a domain-acceptable level. Such choices should be evaluated only inside a cross-validation pipeline to prevent leakage [12,13].</p>
+<h2>4. Deep-Learning Methods</h2>
+<h3>4.1 Primary model: regularized MLP classifier</h3>
+<p>The supervised model is implemented in <code>model.py</code> as a Keras <code>Sequential</code> network. For a standardized input vector $x \in \mathbb{R}^{15}$, each dense layer computes $h = f(Wx+b)$. Hidden layers use ReLU, $f(z)=\max(0,z)$, to introduce non-linearity and support efficient gradient propagation [14]. The final sigmoid unit produces $\hat p = \sigma(z)=1/(1+e^{-z})$, interpreted as the model-estimated probability of the positive (<code>Injury_Risk=1</code>) class.</p>
+<table>
+<thead><tr><th>Block</th><th>Operation</th><th>Output shape</th><th>Parameters</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Input</td><td>15 standardized features</td><td>15</td><td>0</td><td>Receives tabular athlete profile</td></tr>
+<tr><td>1</td><td>Dense(128, ReLU) → BatchNorm → Dropout(0.30)</td><td>128</td><td>2,560</td><td>Learns broad non-linear feature combinations; regularized</td></tr>
+<tr><td>2</td><td>Dense(64, ReLU) → BatchNorm → Dropout(0.30)</td><td>64</td><td>8,512</td><td>Learns higher-order interactions; regularized</td></tr>
+<tr><td>3</td><td>Dense(32, ReLU)</td><td>32</td><td>2,080</td><td>Compresses learned representation</td></tr>
+<tr><td>4</td><td>Dense(16, ReLU)</td><td>16</td><td>528</td><td>Compact discriminative representation</td></tr>
+<tr><td>Output</td><td>Dense(1, sigmoid)</td><td>1</td><td>17</td><td>Outputs $P(\mathrm{high\ risk})$</td></tr>
+<tr><td><strong>Total</strong></td><td></td><td></td><td><strong>13,697</strong></td><td><strong>13,313 trainable; 384 non-trainable BatchNorm statistics</strong></td></tr>
+</tbody>
+</table>
+<p>Batch normalization normalizes intermediate activations within a mini-batch and learns a scale and shift, helping stabilize optimization [15]. Dropout randomly masks 30% of units in the first two hidden blocks during training, reducing co-adaptation and overfitting risk [16]. At inference, dropout is disabled and the full network is used. These methods regularize the model; they do not guarantee that its probability estimates are calibrated [17].</p>
+<h3>4.2 Optimization, loss, and stopping</h3>
+<p>The model is optimized with Adam (initial learning rate $10^{-3}$) [18] and binary cross-entropy:</p>
+<div class="equation">\mathcal{L}_{BCE}=-\frac{1}{N}\sum_{i=1}^{N}\left[y_i\log(\hat p_i)+(1-y_i)\log(1-\hat p_i)\right].</div>
+<p>The recorded training configuration is shown below.</p>
+<table>
+<thead><tr><th>Setting</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Optimizer</td><td>Adam, learning rate 0.001</td></tr>
+<tr><td>Objective</td><td>Binary cross-entropy</td></tr>
+<tr><td>Batch size</td><td>32</td></tr>
+<tr><td>Maximum epochs</td><td>100</td></tr>
+<tr><td>Actual recorded epochs</td><td>24</td></tr>
+<tr><td>Metrics during fit</td><td>Accuracy, precision, recall, ROC-AUC</td></tr>
+<tr><td>Validation split</td><td>20% of development set</td></tr>
+<tr><td>Early stopping</td><td>Monitor <code>val_loss</code>, patience 10, restore best weights</td></tr>
+<tr><td>Learning-rate schedule</td><td>ReduceLROnPlateau on <code>val_loss</code>, factor 0.5, patience 5, minimum $10^{-6}$</td></tr>
+<tr><td>Checkpoint</td><td>Best <code>val_accuracy</code> saved as <code>models/best_model.keras</code></td></tr>
+</tbody>
+</table>
+<p>Early stopping protects against continuing once validation loss no longer improves, while restoring the best observed validation-loss weights [19]. The training checkpoint is monitored by validation accuracy, whereas early stopping and learning-rate reduction monitor validation loss; this difference should be harmonized in a future protocol. A fixed random seed for TensorFlow and repeated/cross-validated evaluation would also improve reproducibility and reduce uncertainty from one split [12,20].</p>
+<h3>4.3 Autoencoder: unsupervised representation learning</h3>
+<p><code>autoencoder.py</code> implements a second deep-learning technique, a symmetric feed-forward autoencoder. It takes the same 15 standardized features and reconstructs them through the architecture:</p>
+<p><code>15 → Dense(64, ReLU) → Dense(32, ReLU) → Dense(16, ReLU) → Dense(32, ReLU) → Dense(64, ReLU) → Dense(15, linear)</code>.</p>
+<p>The encoder maps inputs to a 16-dimensional latent representation; the decoder reconstructs the 15 input variables. It has 7,263 parameters in total (3,632 in the encoder). It is trained with Adam (0.001) and mean-squared reconstruction error,</p>
+<div class="equation">\mathcal{L}_{MSE}=\frac{1}{N}\sum_{i=1}^{N}\lVert x_i-\tilde{x}_i\rVert_2^2.</div>
+<p>Autoencoders can capture correlated structure and offer compact features for later analysis or anomaly-oriented work [21–23]. In this repository, the autoencoder is a separately trained Module 2 artifact; its latent vectors are <strong>not</strong> fed into the reported MLP classifier. Consequently, its reconstruction-loss curve demonstrates representation learning but must not be presented as improving the classifier’s test metrics without an explicit ablation experiment.</p>
+<h3>4.4 Explainability and application layer</h3>
+<p>The Streamlit application (<code>app.py</code>) reports the predicted positive-class probability and applies the app’s three-band risk-label logic. It also uses:</p>
+<p class="bullet">? <strong>SHAP KernelExplainer:</strong> a model-agnostic approximation to Shapley-value feature attributions, using up to 100 standardized training examples as the background distribution [24,25]. Positive/negative contributions explain the prediction relative to that background; they are not causal effects.</p>
+<p class="bullet">? <strong>LIME TabularExplainer:</strong> generates perturbed points around one athlete profile and fits a sparse local surrogate explanation [26]. The implementation supplies two-column probabilities <code>[P(low), P(high)]</code>, as required for classification.</p>
+<p class="bullet">? <strong>Recommendation mapping:</strong> deterministic app rules turn the risk label and input profile into general training/recovery suggestions. These recommendations are not treatment prescriptions.</p>
+<p>Local explanations may vary with the background set, sampling, correlated features, and random perturbations. They should be presented as aids to review rather than proof that a factor caused an injury [27–29].</p>
+<h2>5. Results and Outputs</h2>
+<h3>5.1 Training output</h3>
+<p>The persisted training history contains 24 epochs. At the final recorded epoch, training accuracy was 0.9234, training loss 0.1552, validation accuracy 0.8688, and validation loss 0.3463. The best recorded validation accuracy was 0.8875; the minimum recorded validation loss was 0.3285. The difference between final training and validation performance is consistent with some generalization gap, so the use of dropout, batch normalization, and early stopping is appropriate. It does not replace external validation.</p>
+<h3>5.2 Held-out test output</h3>
+<p>All numbers below are from <code>results/baseline_comparison.csv</code> and the saved 200-record test split. Predictions are converted to class labels using the default threshold $\hat p\ge0.50$.</p>
+<table>
+<thead><tr><th>Metric</th><th>MLP / DNN</th><th>Logistic regression baseline</th><th>Absolute change</th></tr></thead>
+<tbody>
+<tr><td>Accuracy</td><td>0.8850</td><td>0.8600</td><td>+0.0250</td></tr>
+<tr><td>Precision</td><td>0.6923</td><td>0.6250</td><td>+0.0673</td></tr>
+<tr><td>Recall</td><td>0.7105</td><td>0.6579</td><td>+0.0526</td></tr>
+<tr><td>F1-score</td><td>0.7013</td><td>0.6410</td><td>+0.0603</td></tr>
+<tr><td>ROC-AUC</td><td>0.9108</td><td>0.8970</td><td>+0.0138</td></tr>
+</tbody>
+</table>
+<p>The MLP improves the recorded baseline on all five metrics. In particular, F1-score improves by 0.0603 and recall by 0.0526, which are more informative than accuracy alone for this imbalanced dataset. However, a single test split cannot establish statistical superiority; confidence intervals, repeated stratified cross-validation, calibration analysis, and a prospective external cohort are needed [12,13,30].</p>
+<h3>5.3 Confusion matrix and output interpretation</h3>
+<p>The test-set confusion matrix reconstructed from the saved metrics is:</p>
+<table>
+<thead><tr><th>Actual \ Predicted</th><th>Low risk</th><th>High risk</th></tr></thead>
+<tbody>
+<tr><td>Low risk (n = 162)</td><td>150 (true negative)</td><td>12 (false positive)</td></tr>
+<tr><td>High risk (n = 38)</td><td>11 (false negative)</td><td>27 (true positive)</td></tr>
+</tbody>
+</table>
+<p>Thus the classifier identified 27 of 38 positive-class records and missed 11. Whether this error balance is acceptable depends on the intended intervention and the harms of false reassurance versus unnecessary follow-up. The 0.50 threshold is a software default, not a validated clinical operating point; threshold selection should be made with domain stakeholders and decision-analytic evaluation [31,32].</p>
+<h3>5.4 Generated outputs</h3>
+<p>The repository retains the following visual and model outputs:</p>
+<table>
+<thead><tr><th>Output</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>results/accuracy_curve.png</code></td><td>Training and validation accuracy by epoch</td></tr>
+<tr><td><code>results/loss_curve.png</code></td><td>Training and validation binary cross-entropy by epoch</td></tr>
+<tr><td><code>results/confusion_matrix.png</code></td><td>Class errors at threshold 0.50</td></tr>
+<tr><td><code>results/roc_curve.png</code></td><td>True-positive versus false-positive rate; DNN ROC-AUC = 0.9108</td></tr>
+<tr><td><code>results/precision_recall_curve.png</code></td><td>Precision–recall trade-off, useful for minority-class assessment</td></tr>
+<tr><td><code>results/baseline_comparison_chart.png</code></td><td>DNN versus logistic-regression metric comparison</td></tr>
+<tr><td><code>results/autoencoder_loss_curve.png</code></td><td>Autoencoder reconstruction-loss learning curve</td></tr>
+<tr><td><code>models/best_model.keras</code></td><td>Saved trained MLP used by evaluation/app</td></tr>
+</tbody>
+</table>
+<figure><img src="../results/baseline_comparison_chart.png" alt="Figure 1. DNN and logistic-regression performance comparison on the held-out test split."></figure>
+<figure><img src="../results/confusion_matrix.png" alt="Figure 2. Held-out test confusion matrix for the DNN."></figure>
+<figure><img src="../results/accuracy_curve.png" alt="Figure 3. Training and validation accuracy over the recorded run."></figure>
+<figure><img src="../results/loss_curve.png" alt="Figure 4. Training and validation loss over the recorded run."></figure>
+<h2>6. Discussion, Limitations, and Ethics</h2>
+<p>The results indicate that a small regularized MLP can represent non-linear patterns in this tabular dataset better than the recorded linear baseline. The ROC-AUC is high, but performance should not be inflated into a clinical claim. Injury prediction studies are vulnerable to outcome-definition differences, small samples, data leakage, shifting training practices, and limited external validity [3–7,33].</p>
+<p>Important limitations are:</p>
+<ol>
+<li><strong>Dataset provenance and labels:</strong> the report does not establish a prospective injury definition, follow-up window, sport, or labelling protocol.</li>
+<li><strong>Small, single dataset:</strong> 1,000 records are limited for a 13,313-trainable-parameter network; results from one split have sampling uncertainty.</li>
+<li><strong>No external validation or calibration study:</strong> discrimination (ROC-AUC) does not prove probability reliability. Calibration plots, Brier score, and recalibration should be assessed [17,34].</li>
+<li><strong>Imbalance and fixed threshold:</strong> minority-class recall is 0.7105 and 11 positive records are missed. Class weights, focal loss, resampling, and threshold selection require validation without leakage [13,35].</li>
+<li><strong>Feature scope:</strong> self-report measures and static features omit sport-specific exposure, biomechanics, prior injury severity, longitudinal workload, and clinician assessment. Correlation does not establish causation.</li>
+<li><strong>Fairness and privacy:</strong> results should be stratified by relevant groups only when sample sizes support it; health-related data need consent, access control, minimization, and clear governance [36].</li>
+</ol>
+<p>Future work should collect a prospectively labelled, multi-sport longitudinal cohort; pre-register outcome and evaluation definitions; compare MLPs with penalized logistic regression, tree ensembles, and temporal models; use nested cross-validation; assess calibration and decision curves; and conduct clinician-in-the-loop usability testing. For longitudinal training-load sequences, recurrent, temporal-convolutional, or transformer models could be evaluated only after sufficient, time-indexed data are available [37–39].</p>
+<h2>7. Conclusion</h2>
+<p>This project delivers a reproducible deep-learning prototype for tabular athlete injury-risk classification. Its primary 13,697-parameter MLP combines ReLU dense layers, batch normalization, dropout, Adam optimization, adaptive learning-rate reduction, and early stopping. A separate 7,263-parameter autoencoder demonstrates unsupervised feature reconstruction. On the saved held-out split, the MLP achieved 0.8850 accuracy, 0.7013 F1-score, and 0.9108 ROC-AUC, outperforming the recorded logistic-regression baseline. SHAP, LIME, and a Streamlit interface make the output easier to inspect, but neither explanations nor predictive metrics turn the system into a medical device. Prospective external validation, calibration, subgroup analysis, and clinician oversight are required before real-world decision use.</p>
+<h2>8. Module Mapping</h2>
+<table>
+<thead><tr><th>Module</th><th>Technique</th><th>Repository implementation</th></tr></thead>
+<tbody>
+<tr><td>Module 1</td><td>Supervised MLP classification</td><td><code>model.py</code>, <code>train.py</code>, <code>evaluate.py</code></td></tr>
+<tr><td>Module 2</td><td>Symmetric feature-reconstruction autoencoder</td><td><code>autoencoder.py</code>, <code>train_autoencoder.py</code></td></tr>
+<tr><td>Module 3</td><td>Applied XAI and deployment</td><td><code>explainability.py</code>, <code>app.py</code>, <code>predict_recommendation.py</code></td></tr>
+</tbody>
+</table>
+<h2>9. References</h2>
+<p>[1] Bahr, R., &amp; Krosshaug, T. (2005). Understanding injury mechanisms: A key component of preventing injuries in sport. <em>British Journal of Sports Medicine, 39</em>(6), 324–329. https://doi.org/10.1136/bjsm.2005.018341</p>
+<p>[2] Meeuwisse, W. H. (1994). Assessing causation in sport injury: A multifactorial model. <em>Clinical Journal of Sport Medicine, 4</em>(3), 166–170.</p>
+<p>[3] Bittencourt, N. F. N., Meeuwisse, W. H., Mendonça, L. D., Nettel-Aguirre, A., Ocarino, J. M., &amp; Fonseca, S. T. (2016). Complex systems approach for sports injuries: Moving from risk factor identification to injury pattern recognition. <em>British Journal of Sports Medicine, 50</em>(21), 1309–1314. https://doi.org/10.1136/bjsports-2015-095850</p>
+<p>[4] Windt, J., &amp; Gabbett, T. J. (2017). Is it all for naught? What does mathematical coupling mean for acute:chronic workload ratios? <em>British Journal of Sports Medicine, 53</em>(16), 988–990. https://doi.org/10.1136/bjsports-2017-098925</p>
+<p>[5] Impellizzeri, F. M., Marcora, S. M., &amp; Coutts, A. J. (2019). Internal and external training load: 15 years on. <em>International Journal of Sports Physiology and Performance, 14</em>(2), 270–273. https://doi.org/10.1123/ijspp.2018-0935</p>
+<p>[6] Soligard, T., Schwellnus, M., Alonso, J.-M., et al. (2016). How much is too much? (Part 1) International Olympic Committee consensus statement on load in sport and risk of injury. <em>British Journal of Sports Medicine, 50</em>(17), 1030–1041. https://doi.org/10.1136/bjsports-2016-096581</p>
+<p>[7] van Mechelen, W., Hlobil, H., &amp; Kemper, H. C. G. (1992). Incidence, severity, aetiology and prevention of sports injuries: A review of concepts. <em>Sports Medicine, 14</em>(2), 82–99. https://doi.org/10.2165/00007256-199214020-00002</p>
+<p>[8] Claudino, J. G., Capanema, D. de O., de Souza, T. V., Serrão, J. C., Machado Pereira, A. C., &amp; Nassis, G. P. (2019). Current approaches to the use of artificial intelligence for injury risk assessment and performance prediction in team sports: A systematic review. <em>Sports Medicine - Open, 5</em>, 28. https://doi.org/10.1186/s40798-019-0202-3</p>
+<p>[9] Van Eetvelde, H., Mendonça, L. D., Ley, C., Seil, R., &amp; Tischer, T. (2021). Machine learning methods in sport injury prediction and prevention: A systematic review. <em>Journal of Experimental Orthopaedics, 8</em>, 27. https://doi.org/10.1186/s40634-021-00346-x</p>
+<p>[10] Bullock, G. S., et al. (2021). Just how confident can we be in predicting sports injuries? A systematic review of the methodological quality of prediction models. <em>Sports Medicine, 51</em>, 2449–2464.</p>
+<p>[11] Sola, J., &amp; Sevilla, J. (1997). Importance of input data normalization for the application of neural networks to complex industrial problems. <em>IEEE Transactions on Nuclear Science, 44</em>(3), 1464–1468. https://doi.org/10.1109/23.589532</p>
+<p>[12] Varma, S., &amp; Simon, R. (2006). Bias in error estimation when using cross-validation for model selection. <em>BMC Bioinformatics, 7</em>, 91. https://doi.org/10.1186/1471-2105-7-91</p>
+<p>[13] Fernández, A., Garcia, S., Galar, M., Prati, R. C., Krawczyk, B., &amp; Herrera, F. (2018). <em>Learning from Imbalanced Data Sets.</em> Springer. https://doi.org/10.1007/978-3-319-98074-4</p>
+<p>[14] Nair, V., &amp; Hinton, G. E. (2010). Rectified linear units improve restricted Boltzmann machines. In <em>Proceedings of ICML</em> (pp. 807–814).</p>
+<p>[15] Ioffe, S., &amp; Szegedy, C. (2015). Batch normalization: Accelerating deep network training by reducing internal covariate shift. In <em>Proceedings of ICML</em> (pp. 448–456).</p>
+<p>[16] Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., &amp; Salakhutdinov, R. (2014). Dropout: A simple way to prevent neural networks from overfitting. <em>Journal of Machine Learning Research, 15</em>, 1929–1958.</p>
+<p>[17] Guo, C., Pleiss, G., Sun, Y., &amp; Weinberger, K. Q. (2017). On calibration of modern neural networks. In <em>Proceedings of ICML</em> (pp. 1321–1330).</p>
+<p>[18] Kingma, D. P., &amp; Ba, J. (2015). Adam: A method for stochastic optimization. In <em>International Conference on Learning Representations.</em> arXiv:1412.6980.</p>
+<p>[19] Prechelt, L. (1998). Early stopping—but when? In G. Orr &amp; K.-R. Müller (Eds.), <em>Neural Networks: Tricks of the Trade</em> (pp. 55–69). Springer. https://doi.org/10.1007/3-540-49430-8_3</p>
+<p>[20] Nadeau, C., &amp; Bengio, Y. (2003). Inference for the generalization error. <em>Machine Learning, 52</em>, 239–281. https://doi.org/10.1023/A:1024068626366</p>
+<p>[21] Hinton, G. E., &amp; Salakhutdinov, R. R. (2006). Reducing the dimensionality of data with neural networks. <em>Science, 313</em>(5786), 504–507. https://doi.org/10.1126/science.1127647</p>
+<p>[22] Vincent, P., Larochelle, H., Bengio, Y., &amp; Manzagol, P.-A. (2008). Extracting and composing robust features with denoising autoencoders. In <em>Proceedings of ICML</em> (pp. 1096–1103). https://doi.org/10.1145/1390156.1390294</p>
+<p>[23] Bank, D., Koenigstein, N., &amp; Giryes, R. (2021). Autoencoders. In <em>Machine Learning for Data Science Handbook</em> (pp. 353–374). Springer. https://doi.org/10.1007/978-3-030-73981-6_15</p>
+<p>[24] Lundberg, S. M., &amp; Lee, S.-I. (2017). A unified approach to interpreting model predictions. In <em>Advances in Neural Information Processing Systems, 30.</em></p>
+<p>[25] Lundberg, S. M., et al. (2020). From local explanations to global understanding with explainable AI for trees. <em>Nature Machine Intelligence, 2</em>, 56–67. https://doi.org/10.1038/s42256-019-0138-9</p>
+<p>[26] Ribeiro, M. T., Singh, S., &amp; Guestrin, C. (2016). “Why should I trust you?” Explaining the predictions of any classifier. In <em>Proceedings of KDD</em> (pp. 1135–1144). https://doi.org/10.1145/2939672.2939778</p>
+<p>[27] Molnar, C. (2022). <em>Interpretable Machine Learning</em> (2nd ed.). https://christophm.github.io/interpretable-ml-book/</p>
+<p>[28] Adebayo, J., Gilmer, J., Muelly, M., Goodfellow, I., Hardt, M., &amp; Kim, B. (2018). Sanity checks for saliency maps. In <em>Advances in Neural Information Processing Systems, 31.</em></p>
+<p>[29] Slack, D., Hilgard, S., Jia, E., Singh, S., &amp; Lakkaraju, H. (2020). Fooling LIME and SHAP: Adversarial attacks on post hoc explanation methods. In <em>Proceedings of AIES</em> (pp. 180–186). https://doi.org/10.1145/3375627.3375830</p>
+<p>[30] Demšar, J. (2006). Statistical comparisons of classifiers over multiple data sets. <em>Journal of Machine Learning Research, 7</em>, 1–30.</p>
+<p>[31] Vickers, A. J., &amp; Elkin, E. B. (2006). Decision curve analysis: A novel method for evaluating prediction models. <em>Medical Decision Making, 26</em>(6), 565–574. https://doi.org/10.1177/0272989X06295361</p>
+<p>[32] Steyerberg, E. W. (2019). <em>Clinical Prediction Models</em> (2nd ed.). Springer. https://doi.org/10.1007/978-3-030-16399-0</p>
+<p>[33] Collins, G. S., Reitsma, J. B., Altman, D. G., &amp; Moons, K. G. M. (2015). Transparent Reporting of a multivariable prediction model for Individual Prognosis Or Diagnosis (TRIPOD). <em>Annals of Internal Medicine, 162</em>(1), 55–63. https://doi.org/10.7326/M14-0697</p>
+<p>[34] Brier, G. W. (1950). Verification of forecasts expressed in terms of probability. <em>Monthly Weather Review, 78</em>(1), 1–3. https://doi.org/10.1175/1520-0493(1950)078&lt;0001:VOFEIT&gt;2.0.CO;2</p>
+<p>[35] Lin, T.-Y., Goyal, P., Girshick, R., He, K., &amp; Dollár, P. (2017). Focal loss for dense object detection. In <em>Proceedings of ICCV</em> (pp. 2980–2988). https://doi.org/10.1109/ICCV.2017.324</p>
+<p>[36] World Health Organization. (2021). <em>Ethics and governance of artificial intelligence for health: WHO guidance.</em> https://www.who.int/publications/i/item/9789240029200</p>
+<p>[37] Hochreiter, S., &amp; Schmidhuber, J. (1997). Long short-term memory. <em>Neural Computation, 9</em>(8), 1735–1780. https://doi.org/10.1162/neco.1997.9.8.1735</p>
+<p>[38] Bai, S., Kolter, J. Z., &amp; Koltun, V. (2018). An empirical evaluation of generic convolutional and recurrent networks for sequence modeling. arXiv:1803.01271.</p>
+<p>[39] Vaswani, A., et al. (2017). Attention is all you need. In <em>Advances in Neural Information Processing Systems, 30.</em></p>
+<hr>
+<p><em>Prepared from the repository’s saved code, preprocessing artifacts, training history, and evaluation outputs. Last updated: 24 July 2026.</em></p></body></html>
